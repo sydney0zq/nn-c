@@ -13,9 +13,6 @@
  */
 double calculate_loss(double* ptr_train_data, double* W1, double* b1, double* W2, double* b2){
     // Forward propagation to calculate our prediction
-    double* z1 = (double *)malloc(layer[1] * TRAIN_NUM * sizeof(double));
-    double* z2 = (double *)malloc(layer[2] * TRAIN_NUM * sizeof(double));
-    double* a1 = (double *)malloc(layer[1] * TRAIN_NUM * sizeof(double));
     double* prob = (double *)malloc(layer[2] * sizeof(double));
     int row, col, i;
 

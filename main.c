@@ -21,12 +21,31 @@ struct data_box{
 #define REGULARIATION_LAMBDA 0.01   //Regularization strength
 #define ITER_TIMES 200
 
+//DEBUG DOMAIN/////////////////////////
+#define DEBUG_PRINT_INIT_VALUE 1
+///////////////////////////////////////
+
 extern int layer[3];
 int layer[3] = {2, 3, 2};
 
+/* The size of W1 is layer[0]*layer[1]
+ * The size of b1 is layer[1]
+ * The size of W2 is layer[1]*layer[2]
+ * The size of b2 is layer[2]
+ */
+extern double* z1;
+extern double* z2;
+extern double* a1;
+extern double* W1;
+extern double* b1;
+extern double* W2;
+extern double* b2;
+
+/* Function declarations */
 void read_data(char* path, struct data_box* ptr_train_data);
 double gaussrand();
 
+void debug_print_init_value(double* W1, double* b1, double* W2, double* b2);
 
 int main(char argc, char **argv){
     struct data_box train_data[TRAIN_NUM];
@@ -42,17 +61,23 @@ int main(char argc, char **argv){
     double* W2 = (double *)malloc(layer[1]*layer[2]*sizeof(double));
     double* b2 = (double *)malloc(layer[2]*sizeof(double));
 
+    double* z1 = (double *)malloc(TRAIN_NUM * layer[1] * sizeof(double));
+    double* z2 = (double *)malloc(TRAIN_NUM * layer[2] * sizeof(double));
+    double* a1 = (double *)malloc(TRAIN_NUM * layer[1] * sizeof(double));
+
     // Initialize the paramters
-    for (row = 0; row <  layer[0]; row++)
+    for (row = 0; row < layer[0]; row++)
         for (col = 0; col < layer[1]; col++)
             *(W1 + row*layer[1] + col) = gaussrand()/sqrt(layer[0]);
     for (i = 0; i < layer[1]; i++)
         *(b1 + i) = 0;
     for (row = 0; row < layer[1]; row++)
         for (col = 0; col < layer[2]; col++)
-            *(W2 + row*layer[2] + col) = gaussrand()/sqrt(layer[1]);
+            *(W2 + row*layer[1] + col) = gaussrand()/sqrt(layer[1]);
     for (i = 0; i < layer[2]; i++)
         *(b2 + i) = 0;
+
+    if (DEBUG_PRINT_INIT_VALUE) debug_print_init_value(W1, b1, W2, b2);
     
     // Gradient descent for each batch
     for (iter = 0; iter < ITER_TIMES; iter++){
@@ -61,25 +86,26 @@ int main(char argc, char **argv){
         for (row = 0; row < TRAIN_NUM; row++){
             for (col = 0; col < layer[1]; col++){
                 *(z1 + row*layer[1] + col) = 
-                    (ptr_train_data+row)->xc * W1[0][col] + 
-                    (ptr_train_data+row)->yc * W1[1][col];
+                    ((ptr_train_data+row)->xc) * (*(W1 + col)) + 
+                    ((ptr_train_data+row)->yc) * (*(W1 + layer[1] + col));
                 *(z1 + row*layer[1] + col) += b1[col];
-                *(a1 + row*layer[1] + col) = tanh(z1 + row*layer[1] + col);
+                *(a1 + row*layer[1] + col) = tanh(*(z1 + row*layer[1] + col));
+            }
         }
         
         // z2 = a1.dot(W2) + b2 and exp_scores = np.exp(z2)
-	    double tmp;
+        double tmp;
         for (row = 0; row < TRAIN_NUM; row++){
             for (col = 0; col < layer[2]; col++){
                 tmp = 0;
                 for (i = 0; i < layer[1]; i++){
-                    tmp += a1[row][i] * W1[i][col];
+                    tmp += (*(a1 + row*layer[1] + i)) * (*(W1 + i*layer[1] + col));
                 }
                 *(z2 + row*layer[2] + col) += b2[col];
                 *(z2 + row*layer[2] + col) = exp(*(z2 + row*layer[2] + col));
             }
         }        
-       
+           
         // probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
         // Caculate the probability
         for (row = 0; row < TRAIN_NUM; row++){
@@ -92,9 +118,9 @@ int main(char argc, char **argv){
                 *(z2 + row*layer[2] + col) /= tmp;
             }
         }
-    }
+    }// End of gradient descent
+
     
-    }
     
     //free(W1, b1, W2, b2);
 
@@ -128,6 +154,39 @@ void read_data(char* path, struct data_box* ptr_train_data){
     //}
 }
 
+void debug_print_init_value(double* W1, double* b1, double* W2, double* b2){
+    int row, col;
+    printf("Now print init value of W1, b1, W2, b2...\n");
+    // Print W1
+    printf("**********W1**********\n");
+    for (row = 0; row < layer[0]; row++){
+        for (col = 0; col < layer[1]; col++){
+            printf("%f\t", *(W1 + row * layer[0] + col));
+        }
+        printf("\n");
+    }
+    printf("**********************\n");
+    // Print b1
+    printf("\n**********b1**********\n");
+    for (col = 0; col < layer[1]; col++)
+        printf("%f\t", *(b1 + col));
+    printf("\n**********************\n");
+    // Print W2
+    printf("\n**********W2**********\n");
+    for (row = 0; row < layer[1]; row++){
+        for (col = 0; col < layer[2]; col++){
+            printf("%f\t", *(W2 + row * layer[1] + col));
+        }
+        printf("\n");
+    }
+    printf("**********************\n");
+    // Print b2
+    printf("\n**********b2**********\n");
+    for (col = 0; col < layer[2]; col++){
+        printf("%f\t", *(b2 + col));
+    }
+    printf("\n*********************\n");
+}
 
 double gaussrand()
 {
