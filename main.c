@@ -19,12 +19,10 @@ struct data_box{
 #define TRAIN_NUM 200
 #define LEARNING_RATE 0.01  //Learning rate for gradient descent
 #define REGULARIATION_LAMBDA 0.01   //Regularization strength
+#define ITER_TIMES 200
+
 extern int layer[3];
 int layer[3] = {2, 3, 2};
-
-
-
-
 
 void read_data(char* path, struct data_box* ptr_train_data);
 double gaussrand();
@@ -33,7 +31,7 @@ double gaussrand();
 int main(char argc, char **argv){
     struct data_box train_data[TRAIN_NUM];
     struct data_box* ptr_train_data;
-    int row, col, i;
+    int row, col, i, iter;
 
     ptr_train_data = train_data;
     read_data("./dataset.txt", ptr_train_data);
@@ -44,7 +42,7 @@ int main(char argc, char **argv){
     double* W2 = (double *)malloc(layer[1]*layer[2]*sizeof(double));
     double* b2 = (double *)malloc(layer[2]*sizeof(double));
 
-    //Initialize the paramters
+    // Initialize the paramters
     for (row = 0; row <  layer[0]; row++)
         for (col = 0; col < layer[1]; col++)
             *(W1 + row*layer[1] + col) = gaussrand()/sqrt(layer[0]);
@@ -55,8 +53,50 @@ int main(char argc, char **argv){
             *(W2 + row*layer[2] + col) = gaussrand()/sqrt(layer[1]);
     for (i = 0; i < layer[2]; i++)
         *(b2 + i) = 0;
-
     
+    // Gradient descent for each batch
+    for (iter = 0; iter < ITER_TIMES; iter++){
+        // Forward propagation
+	    // z1 = X.dot(W1) + b1 and a1 = np.tanh(z1)
+        for (row = 0; row < TRAIN_NUM; row++){
+            for (col = 0; col < layer[1]; col++){
+                *(z1 + row*layer[1] + col) = 
+                    (ptr_train_data+row)->xc * W1[0][col] + 
+                    (ptr_train_data+row)->yc * W1[1][col];
+                *(z1 + row*layer[1] + col) += b1[col];
+                *(a1 + row*layer[1] + col) = tanh(z1 + row*layer[1] + col);
+        }
+        
+        // z2 = a1.dot(W2) + b2 and exp_scores = np.exp(z2)
+	    double tmp;
+        for (row = 0; row < TRAIN_NUM; row++){
+            for (col = 0; col < layer[2]; col++){
+                tmp = 0;
+                for (i = 0; i < layer[1]; i++){
+                    tmp += a1[row][i] * W1[i][col];
+                }
+                *(z2 + row*layer[2] + col) += b2[col];
+                *(z2 + row*layer[2] + col) = exp(*(z2 + row*layer[2] + col));
+            }
+        }        
+       
+        // probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
+        // Caculate the probability
+        for (row = 0; row < TRAIN_NUM; row++){
+            tmp = 0;
+            // Sum the whole row value
+            for (col = 0; col < layer[2]; col++){
+                tmp += *(z2 + row*layer[2] + col);
+            }
+            for (col = 0; col < layer[2]; col++){
+                *(z2 + row*layer[2] + col) /= tmp;
+            }
+        }
+    }
+    
+    }
+    
+    //free(W1, b1, W2, b2);
 
     return 0;
 }

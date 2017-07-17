@@ -5,10 +5,6 @@
  * Distributed under terms of the MIT license.
  */
 
-#define FOR(i,j) for((i)=0;(i)<(j);((i)++))
-
-
-
 
 /* The size of W1 is layer[0]*layer[1]
  * The size of b1 is layer[1]
@@ -17,9 +13,6 @@
  */
 double calculate_loss(double* ptr_train_data, double* W1, double* b1, double* W2, double* b2){
     // Forward propagation to calculate our prediction
-    // z1: [.............] TRAIN_NUM*layer[1]
-    //     [.............]
-    //     [.............]
     double* z1 = (double *)malloc(layer[1] * TRAIN_NUM * sizeof(double));
     double* z2 = (double *)malloc(layer[2] * TRAIN_NUM * sizeof(double));
     double* a1 = (double *)malloc(layer[1] * TRAIN_NUM * sizeof(double));
@@ -78,15 +71,4 @@ double calculate_loss(double* ptr_train_data, double* W1, double* b1, double* W2
     
 
 }
-
-void matrix_multiply(double *m1,double *m2,double *r,int x,int y,int z)
-{
-    int row,col,k;
-    memset(r,0,8*x*z);
-    FOR(row,x) FOR(k,y) FOR(col, z)
-    *(r+row*z+col)+=((*(m1+row*y+k)) * (*(m2+k*z+col)));
-}
-
-
-
 
