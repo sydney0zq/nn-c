@@ -51,15 +51,17 @@ extern double* exp_scores;
 extern double* probs;
 
 /* Function declarations */
-void read_data(char* path, struct data_box* ptr_train_data);
+void read_data(char* path, struct data_box* ptr_train_data, double* X);
 void debug_print_init_value(double* W1, double* b1, double* W2, double* b2);
 double gaussrand();
-double* transpose(int row, int col, double* matrix);
+double* transpose(double* matrix, int row, int col);
 double* matrix_multi(double* Ma, double* Mb, int row_a, int col_a, int row_b, int col_b);
 void matrix_add_vector(double* matrix, double* vec, int row, int col);
 void matrix_single_op(double* matrix, int row, int col, char* type);
 double* matrix_sum(double* matrix, int row, int col);
+void matrix_add(double* Ma, double* Mb, int row, int col);
 double* elemwise_multi(double* Ma, double* Mb, int row_a, int col_a, int row_b, int col_b);
-void matrix_single_const(double* matrix, double num, int row, int col, char* type);
+double* matrix_single_const(double* matrix, double num, int row, int col, char* type);
+double calculate_loss(struct data_box* ptr_train_data, double* X, double* W1, double* b1, double* W2, double* b2);
 
 #endif /* !HEADER_H */

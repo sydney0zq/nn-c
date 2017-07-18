@@ -1,8 +1,7 @@
 // Copyright © 2017-07-18 Sydney <theodoruszq@gmail.com>
 
 #include "header.h"
-
-
+extern int layer[3];
 // You should NOTICE FREE matrix
 double* matrix_multi(double* Ma, double* Mb, int row_a, int col_a, int row_b, int col_b){
     if (col_a != row_b){
@@ -86,7 +85,7 @@ double* elemwise_multi(double* Ma, double* Mb, int row_a, int col_a, int row_b, 
     return matrix_res;
 }
 
-double* transpose(int row, int col, double* matrix){
+double* transpose(double* matrix, int row, int col){
     int i, j;
     double* matrix_res = (double *)malloc(col * row * sizeof(double));
     int row_res = col;
@@ -212,30 +211,179 @@ double* matrix_sum(double* matrix, int row, int col){
     return vec_res;
 }
 
-void matrix_single_const(double* matrix, double num, int row, int col, char* type){
+double* matrix_single_const(double* matrix, double num, int row, int col, char* type){
     int i, j;
+    double* matrix_res = (double *)malloc(row*col*sizeof(double));
     if (type == "add"){
         for (i = 0; i < row; i++){
             for (j = 0; j < col; j++){
-                *(matrix + i*col + j) += num;
+                *(matrix_res + i*col + j) = (*(matrix + i*col + j)) + num;
             }
         }
     }else if (type == "multi"){
         for (i = 0; i < row; i++){
             for (j = 0; j < col; j++){
-                *(matrix + i*col + j) *= num;
+                *(matrix + i*col + j) = (*(matrix_res + i*col + j)) * num;
             }
         }
     }
 
     if (DEBUG_MATRIX_SINGLE_CONST){
-        printf("\n*****Print Result******\n");
+        printf("\n*****Print Origin******\n");
         for (i = 0; i < row; i++){
             for (j = 0; j < col; j++){
                 printf("%f\t", *(matrix + i*col + j));
             }
         }
+        printf("\n*****Print Result******\n");
+        for (i = 0; i < row; i++){
+            for (j = 0; j < col; j++){
+                printf("%f\t", *(matrix_res + i*col + j));
+            }
+        }
     }
 
+    return matrix_res;
 }
+
+void matrix_add(double* Ma, double* Mb, int row, int col){
+    int i, j;
+    for (i = 0; i < row; i++){
+        for (j = 0; j < col; j++){
+            *(Ma + i*col + j) += *(Mb + i*col + j);
+        }
+    }
+}
+
+/*
+ * Read data from a file which is generated from python script
+ * gen_train_data.py
+ */
+void read_data(char* path, struct data_box* ptr_train_data, double* X){
+    FILE* fp;
+    struct data_box* base_ptr = ptr_train_data;
+    int i;
+
+    if ((fp = fopen(path, "r")) != NULL){
+        for (i = 0; i < TRAIN_NUM; i++, ptr_train_data++){
+            fscanf(fp, "%lf %lf %d", 
+                &(ptr_train_data->xc), &(ptr_train_data->yc), &(ptr_train_data->label));
+            *(X + i*layer[0]) = ptr_train_data->xc;
+            *(X + i*layer[0] + 1) = ptr_train_data->yc;
+        }
+    }else{
+        printf("Read File Error, Now exiting...");
+        exit(1);
+    }
+    fclose(fp);
+    ptr_train_data = base_ptr;
+    //for (i = 0; i < TRAIN_NUM; i++, ptr_train_data++){
+    //    printf("%f, %f, %d\n", ptr_train_data->xc, ptr_train_data->yc, ptr_train_data->label);   
+    //}
+}
+
+void debug_print_init_value(double* W1, double* b1, double* W2, double* b2){
+    int row, col;
+    printf("Now print init value of W1, b1, W2, b2...\n");
+    // Print W1
+    printf("**********W1**********\n");
+    for (row = 0; row < layer[0]; row++){
+        for (col = 0; col < layer[1]; col++){
+            printf("%f\t", *(W1 + row * layer[0] + col));
+        }
+        printf("\n");
+    }
+    printf("**********************\n");
+    // Print b1
+    printf("\n**********b1**********\n");
+    for (col = 0; col < layer[1]; col++)
+        printf("%f\t", *(b1 + col));
+    printf("\n**********************\n");
+    // Print W2
+    printf("\n**********W2**********\n");
+    for (row = 0; row < layer[1]; row++){
+        for (col = 0; col < layer[2]; col++){
+            printf("%f\t", *(W2 + row * layer[2] + col));
+        }
+        printf("\n");
+    }
+    printf("**********************\n");
+    // Print b2
+    printf("\n**********b2**********\n");
+    for (col = 0; col < layer[2]; col++){
+        printf("%f\t", *(b2 + col));
+    }
+    printf("\n*********************\n");
+}
+
+double gaussrand()
+{
+  double x = (double)random() / RAND_MAX,
+         y = (double)random() / RAND_MAX,
+         z = sqrt(-2 * log(x)) * cos(2 * M_PI * y);
+  return z;
+}
+
+double calculate_loss(struct data_box* ptr_train_data, double* X, double* W1, double* b1, double* W2, double* b2){
+    // Forward propagation to calculate our prediction
+    double* z1;
+    double* z2;
+    double* a1;
+    double* exp_scores;
+    
+    double* probs = (double *)malloc(TRAIN_NUM * layer[2] * sizeof(double));
+    int row, col, i;
+
+    // z1 = X.dot(W1) + b1 and a1 = np.tanh(z1)
+    z1 = matrix_multi(X, W1, TRAIN_NUM, layer[0], layer[0], layer[1]);  // TODO free
+    matrix_add_vector(z1, b1, TRAIN_NUM, layer[1]);
+    matrix_single_op(z1, TRAIN_NUM, layer[1], "tanh");
+
+    // z2 = a1.dot(W2) + b2 and exp_scores = np.exp(z2)
+    z2 = matrix_multi(a1, W2, TRAIN_NUM, layer[1], layer[1], layer[2]); // TODO free
+    matrix_add_vector(z2, b2, TRAIN_NUM, layer[2]);
+    matrix_single_op(z2, TRAIN_NUM, layer[2], "exp");
+    exp_scores = z2;
+
+    // Caculate the probability
+    double tmp;
+    for (row = 0; row < TRAIN_NUM; row++){
+        tmp = 0;
+        // Sum the whole row value
+        for (col = 0; col < layer[2]; col++){
+            tmp += *(exp_scores + row*layer[2] + col);
+        }
+        for (col = 0; col < layer[2]; col++){
+            *(probs + row*layer[2] + col) = *(exp_scores + row*layer[2] + col) / tmp;
+        }
+    }
+
+    // Calculating the loss
+    double loss=0;
+    for (i = 0; i < TRAIN_NUM; i++){
+        loss += ( -log(*(probs+i*layer[2]+(ptr_train_data+i+2)->label)) );
+    }
+    // Add regulatization term to loss (optional)
+    // data_loss += reg_lambda/2 * (np.sum(np.square(W1)) + np.sum(np.square(W2)))
+    return (1.0*loss) / TRAIN_NUM;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
