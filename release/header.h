@@ -27,6 +27,8 @@ struct data_box{
 //DEBUG DOMAIN/////////////////////////
 #define DEBUG_PRINT_INIT_VALUE 1
 #define DEBUG_TRANS_DISPLAY 0
+#define DEBUG_MATRIX_MULTI 1
+#define DEBUG_DOT_MULTI 1
 ///////////////////////////////////////
 
 /* The size of W1 is layer[0]*layer[1]

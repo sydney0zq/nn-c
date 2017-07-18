@@ -3,7 +3,6 @@
 #include "header.h"
 
 
-#define DEBUG_MATRIX_MULTI 1
 double* matrix_multi(double* Ma, double* Mb, int row_a, int col_a, int row_b, int col_b);
 
 // You should NOTICE FREE matrix
@@ -86,6 +85,44 @@ void transpose(int row, int col, double* matrix){
     matrix = matrix_res;
 }
 
+// You should NOTICE FREE matrix
+double* dot_multi(double* Ma, double* Mb, int row_a, int col_a, int row_b, int col_b){
+    if ((row_a != row_b) || (col_a != col_b)){
+        printf("Error when elementwise multiply matrix...");
+        exit(1);
+    }
+
+    int i, j, k;
+    double* matrix_res = (double *)malloc(row_a * col_a * sizeof(double));
+    // Actually row_a == row_b and col_a == col_b
+    for (i = 0; i < row_a; i++){
+        for (j = 0; j < col_b; j++){
+            *(matrix_res + i*col_a + j) = ((*(Ma + i*col_a + j)) * (*(Mb + i*col_b + j)));
+        }
+    }
+
+    if (DEBUG_DOT_MULTI){
+        printf("\n*****Print Ma*****\n");
+        for (i = 0; i < row_a; i++){
+            for (j = 0; j < col_a; j++)
+                printf("%lf\t", *(Ma + i*col_a + j));
+            printf("\n");
+        }
+        printf("\n*****Print Mb*****\n");
+        for (i = 0; i < row_b; i++){
+            for (j = 0; j < col_b; j++)
+                printf("%lf\t", *(Mb + i*col_b + j));
+            printf("\n");
+        }
+        printf("\n*****Print Result******\n");
+        for (i = 0; i < row_a; i++){
+            for (j = 0; j < col_b; j++)
+                printf("%lf\t", *(matrix_res + i*col_b + j));
+            printf("\n");
+        }
+    }
+    return matrix_res;
+}
 
  
  
