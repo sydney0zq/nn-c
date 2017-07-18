@@ -212,3 +212,30 @@ double* matrix_sum(double* matrix, int row, int col){
     return vec_res;
 }
 
+void matrix_single_const(double* matrix, double num, int row, int col, char* type){
+    int i, j;
+    if (type == "add"){
+        for (i = 0; i < row; i++){
+            for (j = 0; j < col; j++){
+                *(matrix + i*col + j) += num;
+            }
+        }
+    }else if (type == "multi"){
+        for (i = 0; i < row; i++){
+            for (j = 0; j < col; j++){
+                *(matrix + i*col + j) *= num;
+            }
+        }
+    }
+
+    if (DEBUG_MATRIX_SINGLE_CONST){
+        printf("\n*****Print Result******\n");
+        for (i = 0; i < row; i++){
+            for (j = 0; j < col; j++){
+                printf("%f\t", *(matrix + i*col + j));
+            }
+        }
+    }
+
+}
+

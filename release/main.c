@@ -11,6 +11,11 @@
  * The size of b1 is layer[1]
  * The size of W2 is layer[1]*layer[2]
  * The size of b2 is layer[2]
+ * The size of z1 is TRAIN_NUM * layer[1]
+ * The size of z2 is TRAIN_NUM * layer[2]
+ * The size of exp_scores is TRAIN_NUM * layer[2]  == exp(z2)
+ * The size of probs is TRAIN_NUM * layer[2]
+ * The size of delta3 is same with probs
  */
 extern double* z1;
 extern double* z2;
@@ -94,8 +99,8 @@ int main(char argc, char **argv){
             }
         }
         
-        double* dW2, db2, dW1, db1;
-        double* tmp;
+        double* dW2, db2, dW1, db1, delta2;
+        double* left, right;
 
         // delta3[range(num_examples), y] -= 1
         for (row = 0; row < TRAIN_NUM; row++){
@@ -108,8 +113,26 @@ int main(char argc, char **argv){
         db2 = matrix_sum(delta3, TRAIN_NUM, layer[2]);  //TODO free
 
         // delta2 = delta3.dot(W2.T) * (1 - np.power(a1, 2))
-        dW1 = matrix_multi()
+        W2 = transpose(W2);
+        left = matrix_multi(delta3, W2, TRAIN_NUM, layer[2], layer[2], layer[1]);
+        matrix_single_op(a1, TRAIN_NUM, layer[1], "pow2");
+        for (i = 0; i < TRAIN_NUM; i++){
+            for (j = 0; j < layer[1]; j++){
+                *(a1 + i*layer[1] + j) = 1 - 1*(*(a1 + i*layer[1] + j));
+            }
+        }
+        right = a1;
 
+        delta2 = elemwise_multi(left, right, TRAIN_NUM, layer[1], TRAIN_NUM, layer[1]);
+
+        // dW1 = np.dot(X.T, delta2)
+        X = tranpose(X); 
+        dW1 = matrix_multi(X, delta2, layer[0], TRAIN_NUM, TRAIN_NUM, layer[1]);
+        // db1 = np.sum(delta2, axis=0)
+        db1 = matrix_sum(delta2, TRAIN_NUM, layer[1]);
+
+        // Add regularization terms (b1 and b2 don't have regularization terms)
+        
 
 
 
