@@ -17,8 +17,8 @@ int main(char argc, char ** argv){
             scanf("%lf", Ma+i*col+j);
     }
     //matrix_single_op(Ma, row, col, "exp");
-    //matrix_single_op(Ma, row, col, "tanh");
-    matrix_single_op(Ma, row, col, "pow2");
+    matrix_single_op(Ma, row, col, "tanh");
+    //matrix_single_op(Ma, row, col, "pow2");
     return 0;
 }
 

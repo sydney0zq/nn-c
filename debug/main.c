@@ -42,10 +42,7 @@ int main(char argc, char **argv){
     double* W2 = (double *)malloc(layer[1]*layer[2]*sizeof(double));
     double* b2 = (double *)malloc(layer[2]*sizeof(double));
 
-    double* z1;
-    double* a1;
-    double* z2;
-    double* exp_scores;
+    double* z1; double* a1; double* z2; double* exp_scores;
     double* probs = (double *)malloc(TRAIN_NUM*layer[2]*sizeof(double));
     double* delta3 = (double *)malloc(TRAIN_NUM*layer[2]*sizeof(double));
 
@@ -60,11 +57,11 @@ int main(char argc, char **argv){
             *(W2 + row*layer[2] + col) = gaussrand()/sqrt(layer[1]);
     for (i = 0; i < layer[2]; i++)
         *(b2 + i) = 0;
-
-    if (DEBUG_PRINT_INIT_VALUE) debug_print_init_value(W1, b1, W2, b2);
     
+        printf("\nNow print W1\n");
+        print_matrix(W1, layer[0], layer[1]);
     // Gradient descent for each batch
-    for (iter = 0; iter < ITER_TIMES; iter++){
+    for (iter = 0; iter < 1; iter++){
         if (DEBUG_MAIN){ printf("I am on inter%d\n", iter); }
         // Forward propagation
 	    // z1 = X.dot(W1) + b1 and a1 = np.tanh(z1)
@@ -72,7 +69,6 @@ int main(char argc, char **argv){
         matrix_add_vector(z1, b1, TRAIN_NUM, layer[1]);
         matrix_single_op(z1, TRAIN_NUM, layer[1], "tanh");
         a1 = z1;
-        if (DEBUG_MAIN){ printf("Complete z1 = X.dot(W1) + b1 and a1 = np.tanh(z1)\n"); }
         
         // z2 = a1.dot(W2) + b2 and exp_scores = np.exp(z2)
         z2 = matrix_multi(a1, W2, TRAIN_NUM, layer[1], layer[1], layer[2]); // TODO free
@@ -101,7 +97,6 @@ int main(char argc, char **argv){
                 *(delta3 + row*layer[2] + col) = *(probs + row*layer[2] + col);
             }
         }
-        if (DEBUG_MAIN){ printf("Complete delta3 = probs\n"); }
         
         double* dW2; double* db2; double* dW1; double* db1; double* delta2; double* left; double* right;
 
@@ -109,32 +104,42 @@ int main(char argc, char **argv){
         for (row = 0; row < TRAIN_NUM; row++){
             *(delta3 + row*layer[2] + (ptr_train_data+row)->label) -= 1;
         }
-        if (DEBUG_MAIN){ printf("Complete delta3[range(num_examples), y] -= 1\n"); }
+
         // dW2 = (a1.T).dot(delta3)
         a1 = transpose(a1, TRAIN_NUM, layer[1]);
         dW2 = matrix_multi(a1, delta3, layer[1], TRAIN_NUM, TRAIN_NUM, layer[2]);   //TODO free
-        if (DEBUG_MAIN){ printf("Complete dW2 = (a1.T).dot(delta3)\n"); }
         // db2 = np.sum(delta3, axis=0, keepdims=True)
         db2 = matrix_sum(delta3, TRAIN_NUM, layer[2]);  //TODO free
 
         // delta2 = delta3.dot(W2.T) * (1 - np.power(a1, 2))
         W2 = transpose(W2, layer[1], layer[2]);
+        printf("\nNow print W2//////////////////////\n");
+        print_matrix(W2, layer[2], layer[1]);
+
         left = matrix_multi(delta3, W2, TRAIN_NUM, layer[2], layer[2], layer[1]);
 
+        printf("\nNow print left\n");
+        print_matrix(left, TRAIN_NUM, layer[1]);
         a1 = transpose(a1, layer[1], TRAIN_NUM);
+
+        double* reg0; double* reg1;
         matrix_single_op(a1, TRAIN_NUM, layer[1], "pow2");
-        double* reg0, reg1;
         reg0 = matrix_single_const(a1, -1, TRAIN_NUM, layer[1], "multi");
         free(a1);
-        right = matrix_single_const(reg0, 1, TRAIN_NUM, layer[1], "add");
+        a1 = matrix_single_const(reg0, 1, TRAIN_NUM, layer[1], "add");
         free(reg0);
+        right = a1;
 
         delta2 = elemwise_multi(left, right, TRAIN_NUM, layer[1], TRAIN_NUM, layer[1]);
-
+        printf("\nNow print delta2\n");
+        print_matrix(delta2, TRAIN_NUM, layer[1]);
 
         // dW1 = np.dot(X.T, delta2)
         X = transpose(X, TRAIN_NUM, layer[0]); 
         dW1 = matrix_multi(X, delta2, layer[0], TRAIN_NUM, TRAIN_NUM, layer[1]);
+
+        printf("\nNow print dW1\n");
+        print_matrix(dW1, layer[0], layer[1]);
         // db1 = np.sum(delta2, axis=0)
         db1 = matrix_sum(delta2, TRAIN_NUM, layer[1]);
         X = transpose(X, layer[0], TRAIN_NUM); 
@@ -147,10 +152,15 @@ int main(char argc, char **argv){
         reg_matrix = matrix_single_const(W2, REGULARIATION_LAMBDA, layer[1], layer[2], "multi");
         matrix_add(dW2, reg_matrix, layer[1], layer[2]);
         free(reg_matrix);
-
+        
         reg_matrix = matrix_single_const(W1, REGULARIATION_LAMBDA, layer[0], layer[1], "multi");
+        printf("\nNow print dW1\n");
+        print_matrix(dW1, layer[0], layer[1]);
         matrix_add(dW1, reg_matrix, layer[0], layer[1]);
         free(reg_matrix);
+
+        printf("\nNow print dW1\n");
+        print_matrix(dW1, layer[0], layer[1]);
 
         if (DEBUG_MAIN){ printf("I am ready to update paramter\n"); }
 

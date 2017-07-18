@@ -168,6 +168,7 @@ void matrix_single_op(double* matrix, int row, int col, char* type){
             }
         }
     }else if (!strcmp(type, "pow2")){
+        puts("YES!!!!");
         for (i = 0; i < row; i++){
             for (j = 0; j < col; j++){
                 *(matrix + i*col + j) = pow(*(matrix + i*col + j), 2);
@@ -243,7 +244,7 @@ double* matrix_single_const(double* matrix, double num, int row, int col, char* 
             }
         }
     }
-    free(matrix);
+
     return matrix_res;
 }
 
@@ -306,6 +307,7 @@ void debug_print_init_value(double* W1, double* b1, double* W2, double* b2){
         printf("\n");
     }
     printf("**********************\n");
+    // Print b2
     printf("\n**********b2**********\n");
     for (col = 0; col < layer[2]; col++){
         printf("%f\t", *(b2 + col));
@@ -356,7 +358,6 @@ double calculate_loss(struct data_box* ptr_train_data, double* X, double* W1, do
         }
     }
 
-    //print_matrix(probs, TRAIN_NUM, layer[2]);
     // Calculating the loss
     double loss=0;
     for (i = 0; i < TRAIN_NUM; i++){

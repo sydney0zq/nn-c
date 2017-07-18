@@ -19,13 +19,13 @@ struct data_box{
     int label;
 };
 
-#define TRAIN_NUM 200
+#define TRAIN_NUM 2
 #define LEARNING_RATE 0.01  //Learning rate for gradient descent
 #define REGULARIATION_LAMBDA 0.01   //Regularization strength
 #define ITER_TIMES 20
 
 //DEBUG DOMAIN/////////////////////////
-#define DEBUG_PRINT_INIT_VALUE 0
+#define DEBUG_PRINT_INIT_VALUE 1
 #define DEBUG_TRANS_DISPLAY 0
 #define DEBUG_MATRIX_MULTI 0
 #define DEBUG_MATRIX_ADD_VECTOR 0

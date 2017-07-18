@@ -7,8 +7,8 @@
 
 double* matrix_multi(double* Ma, double* Mb, int row_a, int col_a, int row_b, int col_b);
 int main(char argc, char ** argv){
-    int row_a = 3, col_a = 2;
-    int row_b = 2, col_b = 2;
+    int row_a = 2, col_a = 2;
+    int row_b = 2, col_b = 3;
     int i, j;
     double* Ma = (double *)malloc(row_a * col_a * sizeof(double));
     double* Mb = (double *)malloc(row_b * col_b * sizeof(double));
