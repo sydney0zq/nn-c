@@ -29,9 +29,10 @@ int main(char argc, char **argv){
     struct data_box train_data[TRAIN_NUM];
     struct data_box* ptr_train_data;
     int row, col, i, iter;
+    double* X  = (double *)malloc(TRAIN_NUM*layer[0]*sizeof(double);)
 
     ptr_train_data = train_data;
-    read_data("./dataset.txt", ptr_train_data);
+    read_data("./dataset.txt", ptr_train_data, X);
 
     // Build model: Learns paramters for the NN and returns the model
     double* W1 = (double *)malloc(layer[0]*layer[1]*sizeof(double));
@@ -39,7 +40,7 @@ int main(char argc, char **argv){
     double* W2 = (double *)malloc(layer[1]*layer[2]*sizeof(double));
     double* b2 = (double *)malloc(layer[2]*sizeof(double));
 
-    double* z1 = (double *)malloc(TRAIN_NUM * layer[1] * sizeof(double));
+    double* z1, a1;
     double* a1 = (double *)malloc(TRAIN_NUM * layer[1] * sizeof(double));
     double* z2 = (double *)malloc(TRAIN_NUM * layer[2] * sizeof(double));
     double* exp_scores = (double *)malloc(TRAIN_NUM * layer[2] * sizeof(double));
@@ -64,6 +65,8 @@ int main(char argc, char **argv){
     for (iter = 0; iter < ITER_TIMES; iter++){
         // Forward propagation
 	    // z1 = X.dot(W1) + b1 and a1 = np.tanh(z1)
+        z1 = matrix_multi(X, W1, TRAIN_NUM, layer[0], layer[0], layer[1]);
+        matrix_add_vector
         for (row = 0; row < TRAIN_NUM; row++){
             for (col = 0; col < layer[1]; col++){
                 // Not portable code
@@ -109,12 +112,19 @@ int main(char argc, char **argv){
             }
         }
         
-        double dW2, db2, dW1, db1, W1, b1, W2, b2;
+        double* dW2, db2, dW1, db1, W1, b1, W2, b2;
+        db2 = (double *)malloc()
         // delta3[range(num_examples), y] -= 1
         for (row = 0; row < TRAIN_NUM; row++){
-            //*(delta3 + row*layer[2] + *(ptr_train_data+row*3+2)) -= 1;
-
+            *(delta3 + row*layer[2] + (ptr_train_data+row*3+2)->label) -= 1;
         }
+        // dW2 = (a1.T).dot(delta3)
+        a1 = transpose(a1);
+        dW2 = matrix_multi(a1, delta3, layer[1], TRAIN_NUM, TRAIN_NUM, layer[2]);
+        // db2 = np.sum(delta3, axis=0, keepdims=True)
+        //
+        dW1 = matrix_multi()
+
 
 
 
@@ -139,7 +149,7 @@ int main(char argc, char **argv){
  * Read data from a file which is generated from python script
  * gen_train_data.py
  */
-void read_data(char* path, struct data_box* ptr_train_data){
+void read_data(char* path, struct data_box* ptr_train_data, double* X){
     FILE* fp;
     struct data_box* base_ptr = ptr_train_data;
     int i;
@@ -148,6 +158,8 @@ void read_data(char* path, struct data_box* ptr_train_data){
         for (i = 0; i < TRAIN_NUM; i++, ptr_train_data++){
             fscanf(fp, "%lf %lf %d", 
                 &(ptr_train_data->xc), &(ptr_train_data->yc), &(ptr_train_data->label));
+            *(X + i*layer[0]) = ptr_train_data->xc;
+            *(X + i*layer[0] + 1) = ptr_train_data->yc;
         }
     }else{
         printf("Read File Error, Now exiting...");
