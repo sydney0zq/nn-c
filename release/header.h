@@ -22,7 +22,7 @@ struct data_box{
 #define TRAIN_NUM 200
 #define LEARNING_RATE 0.01  //Learning rate for gradient descent
 #define REGULARIATION_LAMBDA 0.01   //Regularization strength
-#define ITER_TIMES 20
+#define ITER_TIMES 100000
 
 //DEBUG DOMAIN/////////////////////////
 #define DEBUG_PRINT_INIT_VALUE 0

@@ -208,7 +208,6 @@ double* matrix_sum(double* matrix, int row, int col){
             printf("%lf\t", *(vec_res + j));
     }
 
-    free(matrix);
     return vec_res;
 }
 
@@ -243,7 +242,6 @@ double* matrix_single_const(double* matrix, double num, int row, int col, char* 
             }
         }
     }
-    free(matrix);
     return matrix_res;
 }
 
@@ -251,7 +249,7 @@ void matrix_add(double* Ma, double* Mb, int row, int col){
     int i, j;
     for (i = 0; i < row; i++){
         for (j = 0; j < col; j++){
-            *(Ma + i*col + j) += *(Mb + i*col + j);
+            *(Ma + i*col + j) = *(Ma + i*col + j) + *(Mb + i*col + j);
         }
     }
 }
@@ -372,12 +370,12 @@ double calculate_loss(struct data_box* ptr_train_data, double* X, double* W1, do
 
 void print_matrix(double* m, int row, int col){
     int i, j;
-    printf("\n*****Start To Print Matrix*****\n");
+    printf("\n*********\n");
     for (i = 0; i < row; i++){
         for (j = 0; j < col; j++){
             printf("%f\t", *(m+i*col+j));
         }
         printf("\n");
     }
-    printf("*****End******");
+    printf("***********\n");
 }

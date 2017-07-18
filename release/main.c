@@ -72,14 +72,19 @@ int main(char argc, char **argv){
         matrix_add_vector(z1, b1, TRAIN_NUM, layer[1]);
         matrix_single_op(z1, TRAIN_NUM, layer[1], "tanh");
         a1 = z1;
-        if (DEBUG_MAIN){ printf("Complete z1 = X.dot(W1) + b1 and a1 = np.tanh(z1)\n"); }
-        
+#if (DEBUG_MAIN)
+printf("\nPrint z1 = X.dot(W1) + b1 and a1 = np.tanh(z1) ==> a1\n");
+print_matrix(a1, TRAIN_NUM, layer[1]);
+#endif     
         // z2 = a1.dot(W2) + b2 and exp_scores = np.exp(z2)
         z2 = matrix_multi(a1, W2, TRAIN_NUM, layer[1], layer[1], layer[2]); // TODO free
         matrix_add_vector(z2, b2, TRAIN_NUM, layer[2]);
         matrix_single_op(z2, TRAIN_NUM, layer[2], "exp");
         exp_scores = z2;
-        
+#if (DEBUG_MAIN)
+printf("\nPrint z2 = a1.dot(W2) + b2 and exp_scores = np.exp(z2) ==> exp_scores\n");
+print_matrix(exp_scores, TRAIN_NUM, layer[2]);
+#endif     
         // probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
         // Caculate the probability
         double tmp;
@@ -93,6 +98,11 @@ int main(char argc, char **argv){
                 *(probs + row*layer[2] + col) = *(exp_scores + row*layer[2] + col) / tmp;
             }
         }
+#if (DEBUG_MAIN)
+printf("\nPrint probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True) ==> probs\n");
+print_matrix(probs, TRAIN_NUM, layer[2]);
+#endif     
+
 
         /* Backpropagation */
         // delta3 = probs
@@ -101,7 +111,6 @@ int main(char argc, char **argv){
                 *(delta3 + row*layer[2] + col) = *(probs + row*layer[2] + col);
             }
         }
-        if (DEBUG_MAIN){ printf("Complete delta3 = probs\n"); }
         
         double* dW2; double* db2; double* dW1; double* db1; double* delta2; double* left; double* right;
 
@@ -109,35 +118,67 @@ int main(char argc, char **argv){
         for (row = 0; row < TRAIN_NUM; row++){
             *(delta3 + row*layer[2] + (ptr_train_data+row)->label) -= 1;
         }
-        if (DEBUG_MAIN){ printf("Complete delta3[range(num_examples), y] -= 1\n"); }
         // dW2 = (a1.T).dot(delta3)
         a1 = transpose(a1, TRAIN_NUM, layer[1]);
         dW2 = matrix_multi(a1, delta3, layer[1], TRAIN_NUM, TRAIN_NUM, layer[2]);   //TODO free
-        if (DEBUG_MAIN){ printf("Complete dW2 = (a1.T).dot(delta3)\n"); }
+#if (DEBUG_MAIN)
+printf("\nPrint dW2 = (a1.T).dot(delta3) ==> dW2\n");
+print_matrix(dW2, layer[1], layer[2]);
+#endif     
         // db2 = np.sum(delta3, axis=0, keepdims=True)
         db2 = matrix_sum(delta3, TRAIN_NUM, layer[2]);  //TODO free
+
+#if (DEBUG_MAIN)
+printf("\nPrint delta3[range(num_examples), y] -= 1 ==> delta3\n");
+print_matrix(delta3, TRAIN_NUM, layer[2]);
+#endif     
+
+#if (DEBUG_MAIN)
+printf("\nPrint db2 = np.sum(delta3, axis=0, keepdims=True) ==> db2\n");
+print_matrix(db2, 1, layer[2]);
+#endif     
 
         // delta2 = delta3.dot(W2.T) * (1 - np.power(a1, 2))
         W2 = transpose(W2, layer[1], layer[2]);
         left = matrix_multi(delta3, W2, TRAIN_NUM, layer[2], layer[2], layer[1]);
+#if (DEBUG_MAIN)
+printf("\nPrint delta3.dot(W2.T) ==> left\n");
+print_matrix(left, TRAIN_NUM, layer[1]);
+#endif     
 
         a1 = transpose(a1, layer[1], TRAIN_NUM);
         matrix_single_op(a1, TRAIN_NUM, layer[1], "pow2");
-        double* reg0, reg1;
-        reg0 = matrix_single_const(a1, -1, TRAIN_NUM, layer[1], "multi");
-        free(a1);
-        right = matrix_single_const(reg0, 1, TRAIN_NUM, layer[1], "add");
-        free(reg0);
+        double* reg0;
+        double* reg1;
+        a1 = matrix_single_const(a1, -1, TRAIN_NUM, layer[1], "multi");
+        //free(a1);
+        right = matrix_single_const(a1, 1, TRAIN_NUM, layer[1], "add");
+        //free(reg0);
+#if (DEBUG_MAIN)
+printf("\nPrint (1 - np.power(a1, 2)) ==> right");
+print_matrix(right, TRAIN_NUM, layer[1]);
+#endif     
 
         delta2 = elemwise_multi(left, right, TRAIN_NUM, layer[1], TRAIN_NUM, layer[1]);
-
+#if (DEBUG_MAIN)
+printf("\nPrint delta2 = delta3.dot(W2.T) * (1 - np.power(a1, 2)) ==> delta2");
+print_matrix(delta2, TRAIN_NUM, layer[1]);
+#endif     
 
         // dW1 = np.dot(X.T, delta2)
         X = transpose(X, TRAIN_NUM, layer[0]); 
         dW1 = matrix_multi(X, delta2, layer[0], TRAIN_NUM, TRAIN_NUM, layer[1]);
+#if (DEBUG_MAIN)
+printf("\nPrint dW1 = np.dot(X.T, delta2) ==> dW1");
+print_matrix(dW1, layer[0], layer[1]);
+#endif     
         // db1 = np.sum(delta2, axis=0)
         db1 = matrix_sum(delta2, TRAIN_NUM, layer[1]);
         X = transpose(X, layer[0], TRAIN_NUM); 
+#if (DEBUG_MAIN)
+printf("\nPrint db1 = np.sum(delta2, axis=0) ==> db1");
+print_matrix(db1, 1, layer[1]);
+#endif     
 
         // Add regularization terms (b1 and b2 don't have regularization terms)
         double * reg_matrix;
@@ -147,12 +188,18 @@ int main(char argc, char **argv){
         reg_matrix = matrix_single_const(W2, REGULARIATION_LAMBDA, layer[1], layer[2], "multi");
         matrix_add(dW2, reg_matrix, layer[1], layer[2]);
         free(reg_matrix);
+#if (DEBUG_MAIN)
+printf("\nPrint dW2 += reg_lambda * W2 ==> dW2");
+print_matrix(dW2, layer[1], layer[2]);
+#endif     
 
         reg_matrix = matrix_single_const(W1, REGULARIATION_LAMBDA, layer[0], layer[1], "multi");
         matrix_add(dW1, reg_matrix, layer[0], layer[1]);
         free(reg_matrix);
-
-        if (DEBUG_MAIN){ printf("I am ready to update paramter\n"); }
+#if (DEBUG_MAIN)
+printf("\nPrint dW1 += reg_lambda * W1 ==> dW1");
+print_matrix(dW1, layer[0], layer[1]);
+#endif     
 
         // Gradient descent parameter update
         // W1 += -epsilon * dW1
@@ -162,25 +209,38 @@ int main(char argc, char **argv){
         reg_matrix = matrix_single_const(dW1, (-1) * LEARNING_RATE, layer[0], layer[1], "multi");
         matrix_add(W1, reg_matrix, layer[0], layer[1]);
         free(reg_matrix);
+#if (DEBUG_MAIN)
+printf("\nPrint W1 += -epsilon * dW1 ==> W1");
+print_matrix(W1, layer[0], layer[1]);
+#endif  
 
         reg_matrix = matrix_single_const(db1, (-1) * LEARNING_RATE, 1, layer[1], "multi");
         matrix_add(b1, reg_matrix, 1, layer[1]);
         free(reg_matrix);
+#if (DEBUG_MAIN)
+printf("\nPrint b1 += -epsilon * db1 ==> b1\n");
+print_matrix(b1, 1, layer[1]);
+#endif     
         
         reg_matrix = matrix_single_const(dW2, (-1) * LEARNING_RATE, layer[1], layer[2], "multi");
         matrix_add(W2, reg_matrix, layer[1], layer[2]);
         free(reg_matrix);
+#if (DEBUG_MAIN)
+printf("\nPrint W2 += -epsilon * dW2 ==> W2\n");
+print_matrix(W2, layer[1], layer[2]);
+#endif     
 
         reg_matrix = matrix_single_const(db2, (-1) * LEARNING_RATE, 1, layer[2], "multi");
         matrix_add(b2, reg_matrix, 1, layer[2]);
         free(reg_matrix);
+#if (DEBUG_MAIN)
+printf("\nPrint b2 += -epsilon * db2 ==> b2\n");
+print_matrix(b2, 1, layer[2]);
+#endif     
 
-        if (DEBUG_MAIN){ printf("Complete update paramter\n"); }
-
-        if (iter % 1 == 0){
-            printf("Loss after iteration %d: %lf\n", 
-                    iter, calculate_loss(ptr_train_data, X, W1, b1, W2, b2));
-        }
+    if (iter % 10 == 0)
+        printf("Loss after iteration %d: %lf\n", 
+                iter, calculate_loss(ptr_train_data, X, W1, b1, W2, b2));
     }// End of gradient descent
 
     

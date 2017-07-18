@@ -113,8 +113,6 @@ int main(char argc, char **argv){
 
         // delta2 = delta3.dot(W2.T) * (1 - np.power(a1, 2))
         W2 = transpose(W2, layer[1], layer[2]);
-        printf("\nNow print W2//////////////////////\n");
-        print_matrix(W2, layer[2], layer[1]);
 
         left = matrix_multi(delta3, W2, TRAIN_NUM, layer[2], layer[2], layer[1]);
 
@@ -122,6 +120,8 @@ int main(char argc, char **argv){
         print_matrix(left, TRAIN_NUM, layer[1]);
         a1 = transpose(a1, layer[1], TRAIN_NUM);
 
+        printf("\nNow print a1\n");
+        print_matrix(a1, TRAIN_NUM, layer[1]);
         double* reg0; double* reg1;
         matrix_single_op(a1, TRAIN_NUM, layer[1], "pow2");
         reg0 = matrix_single_const(a1, -1, TRAIN_NUM, layer[1], "multi");
