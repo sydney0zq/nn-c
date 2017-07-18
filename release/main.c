@@ -5,29 +5,7 @@
  * Distributed under terms of the MIT license.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <math.h>
-
-struct data_box{
-    double xc;      //The coordinate x and y, must be double type
-    double yc;
-    int label;
-};
-
-#define TRAIN_NUM 200
-#define LEARNING_RATE 0.01  //Learning rate for gradient descent
-#define REGULARIATION_LAMBDA 0.01   //Regularization strength
-#define ITER_TIMES 20000
-
-//DEBUG DOMAIN/////////////////////////
-#define DEBUG_PRINT_INIT_VALUE 1
-#define DEBUG_TRANS_DISPLAY 0
-///////////////////////////////////////
-
-extern int layer[3];
-int layer[3] = {2, 3, 2};
+#include "header.h"
 
 /* The size of W1 is layer[0]*layer[1]
  * The size of b1 is layer[1]
@@ -43,12 +21,9 @@ extern double* W2;
 extern double* b2;
 extern double* exp_scores;
 extern double* probs;
+extern int layer[3];
+int layer[3] = {2, 3, 2};
 
-/* Function declarations */
-void read_data(char* path, struct data_box* ptr_train_data);
-double gaussrand();
-
-void debug_print_init_value(double* W1, double* b1, double* W2, double* b2);
 
 int main(char argc, char **argv){
     struct data_box train_data[TRAIN_NUM];
@@ -137,7 +112,7 @@ int main(char argc, char **argv){
         double dW2, db2, dW1, db1, W1, b1, W2, b2;
         // delta3[range(num_examples), y] -= 1
         for (row = 0; row < TRAIN_NUM; row++){
-            *(delta3 + row*layer[2] + *(ptr_train_data+row*3+2)) -= 1;
+            //*(delta3 + row*layer[2] + *(ptr_train_data+row*3+2)) -= 1;
 
         }
 
@@ -231,69 +206,3 @@ void * dot_matrix_multiply(){
 
 
 }
-
-void transpose(int row, int col, double* matrix){
-    int i, j;
-    double* matrix_res = (double *)malloc(col * row * sizeof(double));
-    int row_res = col;
-    int col_res = row;
-    // Displaying the matrix[][] 
-    if (DEBUG_TRANS_DISPLAY){
-        printf("\n*****Matrix To Be Transposed*****\n");
-        for(i = 0; i < row; ++i)
-            for(j = 0; j < col; ++j){
-                printf("%f  ", *(matrix + i*col + j));
-                if (j == col-1)
-                    printf("\n");
-            }
-    }
-    
-    // Finding the transpose of matrix
-    for(i = 0; i < row; ++i)
-        for(j = 0; j < col; ++j)
-            *(matrix_res + j*col_res + i) = *(matrix + i*col + j);
-    
-    // Displaying the transpose of matrix
-    if (DEBUG_TRANS_DISPLAY){
-        printf("\n*****Transposed Matrix*****\n");
-        for(i = 0; i < row_res; ++i)
-            for(j = 0; j < col_res; ++j){
-                printf("%f  ", *(matrix_res + i*col_res + j));
-                if(j == col_res-1)
-                    printf("\n");
-            }
-    }
-    free(matrix);
-    matrix = matrix_res;
-}
-
-
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-

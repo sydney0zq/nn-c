@@ -7,4 +7,4 @@
 #
 
 
-gcc -o main.out main.c -lm
+gcc -o main.out main.c header.h lib.c -lm
