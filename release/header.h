@@ -25,12 +25,12 @@ struct data_box{
 #define ITER_TIMES 20000
 
 //DEBUG DOMAIN/////////////////////////
-#define DEBUG_PRINT_INIT_VALUE 1
+#define DEBUG_PRINT_INIT_VALUE 0
 #define DEBUG_TRANS_DISPLAY 0
-#define DEBUG_MATRIX_MULTI 1
+#define DEBUG_MATRIX_MULTI 0
 #define DEBUG_MATRIX_ADD_VECTOR 0
 #define DEBUG_MATRIX_SINGLE_OP 0
-#define DEBUG_DOT_MULTI 1
+#define DEBUG_DOT_MULTI 0
 #define DEBUG_MATRIX_SUM 0
 #define DEBUG_MATRIX_SINGLE_CONST 0
 ///////////////////////////////////////
