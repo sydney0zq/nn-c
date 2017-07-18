@@ -23,6 +23,7 @@ struct data_box{
 
 //DEBUG DOMAIN/////////////////////////
 #define DEBUG_PRINT_INIT_VALUE 1
+#define DEBUG_TRANS_DISPLAY 0
 ///////////////////////////////////////
 
 extern int layer[3];
@@ -68,6 +69,7 @@ int main(char argc, char **argv){
     double* z2 = (double *)malloc(TRAIN_NUM * layer[2] * sizeof(double));
     double* exp_scores = (double *)malloc(TRAIN_NUM * layer[2] * sizeof(double));
     double* probs = (double *)malloc(TRAIN_NUM * layer[2] * sizeof(double));
+    double* delta3 = (double *)malloc(TRAIN_NUM * layer[2] * sizeof(double));
 
     // Initialize the paramters
     for (row = 0; row < layer[0]; row++)
@@ -123,6 +125,30 @@ int main(char argc, char **argv){
                 *(probs + row*layer[2] + col) = *(exp_scores + row*layer[2] + col) / tmp;
             }
         }
+
+        // Backpropagation
+        // delta3 = probs
+        for (row = 0; row < TRAIN_NUM; row++){
+            for (col = 0; col < layer[2]; col++){
+                *(delta3 + row*layer[2] + col) = *(probs + row*layer[2] + col);
+            }
+        }
+        
+        double dW2, db2, dW1, db1, W1, b1, W2, b2;
+        // delta3[range(num_examples), y] -= 1
+        for (row = 0; row < TRAIN_NUM; row++){
+            *(delta3 + row*layer[2] + *(ptr_train_data+row*3+2)) -= 1;
+
+        }
+
+
+
+
+
+
+
+
+
     }// End of gradient descent
 
     
@@ -200,3 +226,74 @@ double gaussrand()
          z = sqrt(-2 * log(x)) * cos(2 * M_PI * y);
   return z;
 }
+
+void * dot_matrix_multiply(){
+
+
+}
+
+void transpose(int row, int col, double* matrix){
+    int i, j;
+    double* matrix_res = (double *)malloc(col * row * sizeof(double));
+    int row_res = col;
+    int col_res = row;
+    // Displaying the matrix[][] 
+    if (DEBUG_TRANS_DISPLAY){
+        printf("\n*****Matrix To Be Transposed*****\n");
+        for(i = 0; i < row; ++i)
+            for(j = 0; j < col; ++j){
+                printf("%f  ", *(matrix + i*col + j));
+                if (j == col-1)
+                    printf("\n");
+            }
+    }
+    
+    // Finding the transpose of matrix
+    for(i = 0; i < row; ++i)
+        for(j = 0; j < col; ++j)
+            *(matrix_res + j*col_res + i) = *(matrix + i*col + j);
+    
+    // Displaying the transpose of matrix
+    if (DEBUG_TRANS_DISPLAY){
+        printf("\n*****Transposed Matrix*****\n");
+        for(i = 0; i < row_res; ++i)
+            for(j = 0; j < col_res; ++j){
+                printf("%f  ", *(matrix_res + i*col_res + j));
+                if(j == col_res-1)
+                    printf("\n");
+            }
+    }
+    free(matrix);
+    matrix = matrix_res;
+}
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
