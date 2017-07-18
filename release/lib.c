@@ -153,3 +153,29 @@ void matrix_add_vector(double* matrix, double* vec, int row, int col){
         }
     }
 }
+
+void matrix_single_op(double* matrix, int row, int col, char* type){
+    int i, j;
+    if (type == "exp"){
+        for (i = 0; i < row; i++){
+            for (j = 0; j < col; j++){
+                *(matrix + i*col + j) = exp(*(matrix + i*col + j));
+            }
+        }
+    }else if (type == "tanh"){
+        for (i = 0; i < row; i++){
+            for (j = 0; j < col; j++){
+                *(matrix + i*col + j) = tanh(*(matrix + i*col + j));
+            }
+        }
+    }
+
+    if (DEBUG_MATRIX_SINGLE_OP){
+        printf("\n*****Print Result******\n");
+        for (i = 0; i < row; i++){
+            for (j = 0; j < col; j++)
+                printf("%lf\t", *(matrix + i*col + j));
+            printf("\n");
+        }
+    }
+}

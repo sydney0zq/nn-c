@@ -66,17 +66,8 @@ int main(char argc, char **argv){
         // Forward propagation
 	    // z1 = X.dot(W1) + b1 and a1 = np.tanh(z1)
         z1 = matrix_multi(X, W1, TRAIN_NUM, layer[0], layer[0], layer[1]);
-        matrix_add_vector
-        for (row = 0; row < TRAIN_NUM; row++){
-            for (col = 0; col < layer[1]; col++){
-                // Not portable code
-                *(z1 + row*layer[1] + col) = 
-                    ((ptr_train_data+row)->xc) * (*(W1 + col)) + 
-                    ((ptr_train_data+row)->yc) * (*(W1 + layer[1] + col));
-                *(z1 + row*layer[1] + col) += b1[col];
-                *(a1 + row*layer[1] + col) = tanh(*(z1 + row*layer[1] + col));
-            }
-        }
+        matrix_add_vector(z1, b1, TRAIN_NUM, layer[1]);
+        *(a1 + row*layer[1] + col) = tanh(*(z1 + row*layer[1] + col));
         
         // z2 = a1.dot(W2) + b2 and exp_scores = np.exp(z2)
         double tmp;
