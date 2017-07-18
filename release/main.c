@@ -40,10 +40,7 @@ int main(char argc, char **argv){
     double* W2 = (double *)malloc(layer[1]*layer[2]*sizeof(double));
     double* b2 = (double *)malloc(layer[2]*sizeof(double));
 
-    double* z1, a1;
-    double* a1 = (double *)malloc(TRAIN_NUM * layer[1] * sizeof(double));
-    double* z2 = (double *)malloc(TRAIN_NUM * layer[2] * sizeof(double));
-    double* exp_scores = (double *)malloc(TRAIN_NUM * layer[2] * sizeof(double));
+    double* z1, a1, z2, exp_scores;
     double* probs = (double *)malloc(TRAIN_NUM * layer[2] * sizeof(double));
     double* delta3 = (double *)malloc(TRAIN_NUM * layer[2] * sizeof(double));
 
@@ -65,22 +62,16 @@ int main(char argc, char **argv){
     for (iter = 0; iter < ITER_TIMES; iter++){
         // Forward propagation
 	    // z1 = X.dot(W1) + b1 and a1 = np.tanh(z1)
-        z1 = matrix_multi(X, W1, TRAIN_NUM, layer[0], layer[0], layer[1]);
+        z1 = matrix_multi(X, W1, TRAIN_NUM, layer[0], layer[0], layer[1]);  // TODO free
         matrix_add_vector(z1, b1, TRAIN_NUM, layer[1]);
-        *(a1 + row*layer[1] + col) = tanh(*(z1 + row*layer[1] + col));
+        matrix_single_op(z1, TRAIN_NUM, layer[1], "tanh")
+        a1 = z1;
         
         // z2 = a1.dot(W2) + b2 and exp_scores = np.exp(z2)
-        double tmp;
-        for (row = 0; row < TRAIN_NUM; row++){
-            for (col = 0; col < layer[2]; col++){
-                tmp = 0;
-                for (i = 0; i < layer[1]; i++){
-                    tmp += (*(a1 + row*layer[1] + i)) * (*(W2 + i*layer[1] + col));
-                }
-                *(z2 + row*layer[2] + col) += b2[col];
-                *(exp_scores + row*layer[2] + col) = exp(*(z2 + row*layer[2] + col));
-            }
-        }        
+        z2 = matrix_multi(a1, W2, TRAIN_NUM, layer[1], layer[1], layer[2]); // TODO free
+        matrix_add_vector(z2, b2, TRAIN_NUM, layer[2]);
+        matrix_single_op(z2, TRAIN_NUM, layer[2], "exp");
+        exp_scores = z2;
         
         // probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
         // Caculate the probability
@@ -103,17 +94,20 @@ int main(char argc, char **argv){
             }
         }
         
-        double* dW2, db2, dW1, db1, W1, b1, W2, b2;
-        db2 = (double *)malloc()
+        double* dW2, db2, dW1, db1;
+        double* tmp;
+
         // delta3[range(num_examples), y] -= 1
         for (row = 0; row < TRAIN_NUM; row++){
             *(delta3 + row*layer[2] + (ptr_train_data+row*3+2)->label) -= 1;
         }
         // dW2 = (a1.T).dot(delta3)
         a1 = transpose(a1);
-        dW2 = matrix_multi(a1, delta3, layer[1], TRAIN_NUM, TRAIN_NUM, layer[2]);
+        dW2 = matrix_multi(a1, delta3, layer[1], TRAIN_NUM, TRAIN_NUM, layer[2]);   //TODO free
         // db2 = np.sum(delta3, axis=0, keepdims=True)
-        //
+        db2 = matrix_sum(delta3, TRAIN_NUM, layer[2]);  //TODO free
+
+        // delta2 = delta3.dot(W2.T) * (1 - np.power(a1, 2))
         dW1 = matrix_multi()
 
 

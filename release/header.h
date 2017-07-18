@@ -31,6 +31,7 @@ struct data_box{
 #define DEBUG_MATRIX_ADD_VECTOR 0
 #define DEBUG_MATRIX_SINGLE_OP 0
 #define DEBUG_DOT_MULTI 1
+#define DEBUG_MATRIX_SUM 0
 ///////////////////////////////////////
 
 /* The size of W1 is layer[0]*layer[1]
@@ -55,6 +56,8 @@ double gaussrand();
 double* transpose(int row, int col, double* matrix);
 double* matrix_multi(double* Ma, double* Mb, int row_a, int col_a, int row_b, int col_b);
 void matrix_add_vector(double* matrix, double* vec, int row, int col);
+void matrix_single_op(double* matrix, int row, int col, char* type);
+double* matrix_sum(double* matrix, int row, int col);
 double* elemwise_multi(double* Ma, double* Mb, int row_a, int col_a, int row_b, int col_b);
 
 #endif /* !HEADER_H */

@@ -168,6 +168,12 @@ void matrix_single_op(double* matrix, int row, int col, char* type){
                 *(matrix + i*col + j) = tanh(*(matrix + i*col + j));
             }
         }
+    }else if (type == "pow2"){
+        for (i = 0; i < row; i++){
+            for (j = 0; j < col; j++){
+                *(matrix + i*col + j) = pow(*(matrix + i*col + j), 2);
+            }
+        }
     }
 
     if (DEBUG_MATRIX_SINGLE_OP){
@@ -179,3 +185,30 @@ void matrix_single_op(double* matrix, int row, int col, char* type){
         }
     }
 }
+
+double* matrix_sum(double* matrix, int row, int col){
+    int i, j;
+    double* vec_res = (double *)malloc(col*sizeof(double));
+
+    for (i = 0; i < col; i++){
+        *(vec_res + i) = 0;
+        for (j = 0; j < row; j++){
+            *(vec_res + i) += *(matrix + i + j*col);
+        }
+    }
+
+    if (DEBUG_MATRIX_SUM){
+        printf("\n*****Print Matrix******\n");
+        for (i = 0; i < row; i++){
+            for (j = 0; j < col; j++)
+                printf("%lf\t", *(matrix + i*col + j));
+            printf("\n");
+        }
+        printf("\n*****Print Result******\n");
+        for (j = 0; j < col; j++)
+            printf("%lf\t", *(vec_res + j));
+    }
+
+    return vec_res;
+}
+

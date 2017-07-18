@@ -16,8 +16,9 @@ int main(char argc, char ** argv){
         for (j = 0; j < col; j++)
             scanf("%lf", Ma+i*col+j);
     }
-    matrix_single_op(Ma, row, col, "exp");
-    matrix_single_op(Ma, row, col, "tanh");
+    //matrix_single_op(Ma, row, col, "exp");
+    //matrix_single_op(Ma, row, col, "tanh");
+    matrix_single_op(Ma, row, col, "pow2");
     return 0;
 }
 
@@ -33,6 +34,12 @@ void matrix_single_op(double* matrix, int row, int col, char* type){
         for (i = 0; i < row; i++){
             for (j = 0; j < col; j++){
                 *(matrix + i*col + j) = tanh(*(matrix + i*col + j));
+            }
+        }
+    }else if (type == "pow2"){
+        for (i = 0; i < row; i++){
+            for (j = 0; j < col; j++){
+                *(matrix + i*col + j) = pow(*(matrix + i*col + j), 2);
             }
         }
     }
