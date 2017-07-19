@@ -1,8 +1,3 @@
-/*
- * main.c
- * Distributed under terms of the GPLv3 license.
- */
-
 #include "header.h"
 
 /* The size of W1 is layer[0]*layer[1]
@@ -33,10 +28,15 @@ int main(char argc, char **argv){
     struct data_box train_data[TRAIN_NUM];
     struct data_box* ptr_train_data;
     int row, col, i, j, iter;
-    double* X  = (double *)malloc(TRAIN_NUM*layer[0]*sizeof(double));
 
-    ptr_train_data = train_data;
-    read_data("./dataset.txt", ptr_train_data, X);
+    double* X_train = (double *)malloc(TRAIN_NUM*layer[0]*sizeof(double));
+    int*    y_train = (int *)malloc(TRAIN_NUM*CLASS_NUM*sizeof(int));
+    double* X_valid = (double *)malloc(VALIDATION_NUM*layer[0]*sizeof(double));
+    int*    y_valid = (int *)malloc(VALIDATION_NUM*CLASS_NUM*sizeof(int));
+    double* X_test  = (double *)malloc(TEST_NUM*layer[0]*sizeof(double));
+    int*    y_test  = (int *)malloc(TEST_NUM*CLASS_NUM*sizeof(int));
+
+    //read_data(X_train, y_train, X_valid, y_valid, X_test, y_test);
 
     // Build model: Learns paramters for the NN and returns the model
     double* W1 = (double *)malloc(layer[0]*layer[1]*sizeof(double));
