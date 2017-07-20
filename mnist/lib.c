@@ -280,7 +280,7 @@ void save_model(double* W1, double* b1, double* W2, double* b2){
 
     if ((fp = fopen("./model/b1.txt", "w")) != NULL){
         for (i = 0; i < layer[1]; i++)
-            fprintf(fp, "%d ", *(b1 + i));
+            fprintf(fp, "%lf ", *(b1 + i));
         fclose(fp);
     }else{
         printf("Write file error, now exiting...");
@@ -299,7 +299,7 @@ void save_model(double* W1, double* b1, double* W2, double* b2){
 
     if ((fp = fopen("./model/b2.txt", "w")) != NULL){
         for (i = 0; i < layer[2]; i++)
-            fprintf(fp, "%d ", *(b2 + i));
+            fprintf(fp, "%lf ", *(b2 + i));
         fclose(fp);
     }else{
         printf("Write file error, now exiting...");

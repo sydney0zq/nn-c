@@ -3,4 +3,4 @@ data/*
 __pycache__
 *.swp
 snippets
-model/*.txt
+model
