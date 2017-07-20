@@ -101,8 +101,6 @@ void matrix_single_const(double* matrix, double num, int row, int col, char* typ
             }
         }
     }
-
-    return matrix_res;
 }
 
 double* transpose(double* matrix, int row, int col){
@@ -140,6 +138,7 @@ double* elemwise_multi(double* Ma, double* Mb, int row_a, int col_a, int row_b, 
 
 void softmax(double* matrix, int row, int col){
     double tmp;
+    int i, j;
     for (i = 0; i < row; i++){
         tmp = 0;
         // Sum the whole row value
@@ -147,6 +146,15 @@ void softmax(double* matrix, int row, int col){
             tmp += *(matrix + i*col + j);
         for (j = 0; j < col; j++)
             *(matrix + i*col + j) = *(matrix + i*col + j) / tmp;
+    }
+}
+
+void matrix_add(double* Ma, double* Mb, int row, int col){
+    int i, j;
+    for (i = 0; i < row; i++){
+        for (j = 0; j < col; j++){
+            *(Ma + i*col + j) = *(Ma + i*col + j) + *(Mb + i*col + j);
+        }
     }
 }
 

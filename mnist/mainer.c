@@ -41,8 +41,8 @@ int main(char argc, char **argv){
     /* Stochastic Gradient Descent */
     for (iter = 0; iter < EPOCHES; iter++){
         gen_batch(X_train, y_train, X_batch, y_batch);
-        double* z1; double* a1; double* probs; 
-        double* probs = (double *)malloc(BATCH_SIZE * layer[2] * sizeof(double));
+        double* z1; double* a1; double* probs; double* z2; double* exp_scores;
+
 
         /* Forward propagation */
         // z1 = X_batch.dot(W1) + b1 and a1 = np.tanh(z1)
@@ -66,13 +66,14 @@ int main(char argc, char **argv){
 
         /* Backpropagation */
         double* delta3; double* dW2; double* b2; double* dW1; double* b1; double* left; double* right;
+        double* db2;    double* db1; double* delta2;
         // delta3 = probs
         // http://okye062gb.bkt.clouddn.com/2017-07-19-142324.jpg   Softmax BP Algorithm
         delta3 = probs;
         for (i = 0; i < BATCH_SIZE; i++){
             for (j = 0; j < CLASS_NUM; j++){
                 if (*(y_batch + i*CLASS_NUM + j) == 1){
-                    *(delta3 + i*layer[2] + hit) -= 1;
+                    *(delta3 + i*layer[2] + j) -= 1;
                     break;  // Break can only break out the most nearby for
                 }
             }
@@ -108,12 +109,13 @@ int main(char argc, char **argv){
         // dW2 += REGULARIATION_LAMBDA * W2
         // dW1 += REGULARIATION_LAMBDA * W1
         W2 = transpose(W2, layer[2], layer[1]);
-        matrix_copy(reg_matrix, W2);
+        matrix_copy(reg_matrix, W2, layer[1], layer[2]);
         matrix_single_const(reg_matrix, REGULARIATION_LAMBDA, layer[1], layer[2], "multi");
         matrix_add(dW2, reg_matrix, layer[1], layer[2]);
         free(reg_matrix);
 
-        reg_matrix = matrix_single_const(W1, REGULARIATION_LAMBDA, layer[0], layer[1], "multi");
+        matrix_copy(reg_matrix, W1, layer[0], layer[1]);
+        matrix_single_const(reg_matrix, REGULARIATION_LAMBDA, layer[0], layer[1], "multi");
         matrix_add(dW1, reg_matrix, layer[0], layer[1]);
         free(reg_matrix);
 
@@ -122,21 +124,14 @@ int main(char argc, char **argv){
         // b1 += -LEARNING_RATE * db1
         // W2 += -LEARNING_RATE * dW2
         // b2 += -LEARNING_RATE * db2
-        reg_matrix = matrix_single_const(dW1, (-1) * LEARNING_RATE, layer[0], layer[1], "multi");
-        matrix_add(W1, reg_matrix, layer[0], layer[1]);
-        free(reg_matrix);
-
-        reg_matrix = matrix_single_const(db1, (-1) * LEARNING_RATE, 1, layer[1], "multi");
-        matrix_add(b1, reg_matrix, 1, layer[1]);
-        free(reg_matrix);
-
-        reg_matrix = matrix_single_const(dW2, (-1) * LEARNING_RATE, layer[1], layer[2], "multi");
-        matrix_add(W2, reg_matrix, layer[1], layer[2]);
-        free(reg_matrix);
-
-        reg_matrix = matrix_single_const(db2, (-1) * LEARNING_RATE, 1, layer[2], "multi");
-        matrix_add(b2, reg_matrix, 1, layer[2]);
-        free(reg_matrix);
+        matrix_single_const(dW1, (-1) * LEARNING_RATE, layer[0], layer[1], "multi");
+        matrix_add(W1, dW1, layer[0], layer[1]);
+        matrix_single_const(db1, (-1) * LEARNING_RATE, 1, layer[1], "multi");
+        matrix_add(b1, db1, 1, layer[1]);
+        matrix_single_const(dW2, (-1) * LEARNING_RATE, layer[1], layer[2], "multi");
+        matrix_add(W2, dW2, layer[1], layer[2]);
+        matrix_single_const(db2, (-1) * LEARNING_RATE, 1, layer[2], "multi");
+        matrix_add(b2, db2, 1, layer[2]);
 
     }
 
