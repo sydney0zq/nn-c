@@ -37,7 +37,7 @@ void read_data(double* X_train, int* y_train, double* X_valid, int* y_valid, dou
     if ((fp = fopen("./data/dataset_vali_label.txt", "r")) != NULL){
         for (i = 0; i < VALIDATION_NUM; i++)
             for (j = 0; j < layer[0]; j++)
-                fscanf(fp, "%d", X_valid + i*layer[0] + j);
+                fscanf(fp, "%d", y_valid + i*layer[0] + j);
         fclose(fp);
     }else{
         printf("Read File Error, Now exiting...");
@@ -57,7 +57,7 @@ void read_data(double* X_train, int* y_train, double* X_valid, int* y_valid, dou
     if ((fp = fopen("./data/dataset_test_label.txt", "r")) != NULL){
         for (i = 0; i < TEST_NUM; i++)
             for (j = 0; j < CLASS_NUM; j++)
-                fscanf(fp, "%d", X_test + i*CLASS_NUM + j);
+                fscanf(fp, "%d", y_test + i*CLASS_NUM + j);
         fclose(fp);
     }else{
         printf("Read File Error, Now exiting...");
