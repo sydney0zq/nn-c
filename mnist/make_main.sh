@@ -7,4 +7,5 @@
 #
 
 
-gcc -o main.out main.c header.h read_data.c lib.c calculate_loss.c -lm
+gcc -o main.out main.c header.h read_data.c lib.c calculate_loss.c init_layer.c -lm
+

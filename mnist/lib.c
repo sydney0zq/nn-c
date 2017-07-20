@@ -1,7 +1,5 @@
 #include "header.h"
 
-extern int layer[3];
-
 void init_model_params(double* W1, double* b1, double* W2, double* b2){
     int row, col, i;
     // Initialize the paramters
@@ -23,6 +21,7 @@ void gen_batch(double* X_train, int* y_train, double* X_batch, int* y_batch){
     int batch_index[BATCH_SIZE];
     for (i = 0; i < BATCH_SIZE; i++)
        *(batch_index + i) = rand() % TRAIN_NUM;
+       //*(batch_index + i) = i;
 
     for (i = 0; i < BATCH_SIZE; i++){
         for (j = 0; j < layer[0]; j++){
@@ -34,7 +33,6 @@ void gen_batch(double* X_train, int* y_train, double* X_batch, int* y_batch){
     }
 }
 
-// You should NOTICE FREE matrix
 double* matrix_multi(double* Ma, double* Mb, int row_a, int col_a, int row_b, int col_b){
     if (col_a != row_b){
         printf("Error when multiply matrix...");
@@ -116,7 +114,6 @@ double* transpose(double* matrix, int row, int col){
     return matrix_res;
 }
 
-// You should NOTICE FREE matrix
 double* elemwise_multi(double* Ma, double* Mb, int row_a, int col_a, int row_b, int col_b){
     if ((row_a != row_b) || (col_a != col_b)){
         printf("Error when elementwise multiply matrix...");
@@ -152,7 +149,7 @@ void matrix_add(double* Ma, double* Mb, int row, int col){
     int i, j;
     for (i = 0; i < row; i++){
         for (j = 0; j < col; j++){
-            *(Ma + i*col + j) = *(Ma + i*col + j) + *(Mb + i*col + j);
+            *(Ma + i*col + j) += *(Mb + i*col + j);
         }
     }
 }
@@ -197,3 +194,166 @@ void print_matrix(double* m, int row, int col){
     }
     printf("**********\n");
 }
+
+void read_test_data(double* X_test, int* y_test){
+    FILE* fp;
+    int i, j;
+
+    // Read test data
+    if ((fp = fopen("./data/dataset_test.txt", "r")) != NULL){
+        for (i = 0; i < TEST_NUM; i++)
+            for (j = 0; j < layer[0]; j++)
+                fscanf(fp, "%lf", X_test + i*layer[0] + j);
+        fclose(fp);
+    }else{
+        printf("Read File Error, Now exiting...");
+        exit(1);
+    }
+    if ((fp = fopen("./data/dataset_test_label.txt", "r")) != NULL){
+        for (i = 0; i < TEST_NUM; i++)
+            for (j = 0; j < CLASS_NUM; j++)
+                fscanf(fp, "%d", y_test + i*CLASS_NUM + j);
+        fclose(fp);
+    }else{
+        printf("Read File Error, Now exiting...");
+        exit(1);
+    }
+
+}
+
+void read_model(double* W1, double* b1, double* W2, double* b2){
+    int i, j;
+    FILE* fp;
+
+    if ((fp = fopen("./model/W1.txt", "r")) != NULL){
+        for(i = 0; i < layer[0]; i++)
+            for(j = 0; j < layer[1]; j++)
+                fscanf(fp, "%lf", W1 + i*layer[1] + j);
+        fclose(fp);
+    }else{
+        printf("Read file error, now exiting...");
+        exit(1);
+    }
+
+    if ((fp = fopen("./model/b1.txt", "r")) != NULL){
+        for(j = 0; j < layer[1]; j++)
+            fscanf(fp, "%lf", b1 + j);
+        fclose(fp);
+    }else{
+        printf("Read file error, now exiting...");
+        exit(1);
+    } 
+
+    if ((fp = fopen("./model/W2.txt", "r")) != NULL){
+        for (i = 0; i < layer[1]; i++)
+            for(j = 0; j < layer[2]; j++)
+                fscanf(fp, "%lf", W2 + i*layer[2] + j);
+        fclose(fp);
+    }else{
+        printf("Read file error, now exiting...");
+        exit(1);
+    } 
+
+    if ((fp = fopen("./model/b2.txt", "r")) != NULL){
+        for(j = 0; j < layer[2]; j++)
+            fscanf(fp, "%lf", b2 + j);
+        fclose(fp);
+    }else{
+        printf("Read file error, now exiting...");
+        exit(1);
+    } 
+}
+
+void save_model(double* W1, double* b1, double* W2, double* b2){
+    int i, j;
+    FILE* fp;
+
+    if ((fp = fopen("./model/W1.txt", "w")) != NULL){
+        for (i = 0; i < layer[0]; i++)
+            for (j = 0; j < layer[1]; j++)
+                fprintf(fp, "%lf ", *(W1 + i*layer[1] + j));
+        fclose(fp);
+    }else{
+        printf("Write file error, now exiting...");
+        exit(1);
+    }
+
+    if ((fp = fopen("./model/b1.txt", "w")) != NULL){
+        for (i = 0; i < layer[1]; i++)
+            fprintf(fp, "%d ", *(b1 + i));
+        fclose(fp);
+    }else{
+        printf("Write file error, now exiting...");
+        exit(1);
+    }
+
+    if ((fp = fopen("./model/W2.txt", "w")) != NULL){
+        for (i = 0; i < layer[1]; i++)
+            for (j = 0; j < layer[2]; j++)
+                fprintf(fp, "%lf ", *(W2 + i*layer[2] + j));
+        fclose(fp);
+    }else{
+        printf("Write file error, now exiting...");
+        exit(1);
+    }
+
+    if ((fp = fopen("./model/b2.txt", "w")) != NULL){
+        for (i = 0; i < layer[2]; i++)
+            fprintf(fp, "%d ", *(b2 + i));
+        fclose(fp);
+    }else{
+        printf("Write file error, now exiting...");
+        exit(1);
+    }
+}
+
+double test_accuracy(double* X_test, int* y_test, double* W1, double* b1, double* W2, double* b2){
+    
+    double* z1; double* z2; double* a1; double* exp_scores; double* probs;
+    int i, j;
+    // z1 = x.dot(W1) + b1 and a1 = np.tanh(z1)
+    z1 = matrix_multi(X_test, W1, TEST_NUM, layer[0], layer[0], layer[1]);  // TODO free -
+    matrix_add_vector(z1, b1, TEST_NUM, layer[1]);
+    matrix_single_op(z1, TEST_NUM, layer[1], "tanh");
+    a1 = z1;
+
+    // z2 = a1.dot(W2) + b2 and exp_scores = np.exp(z2)
+    z2 = matrix_multi(a1, W2, TEST_NUM, layer[1], layer[1], layer[2]); // TODO free -
+    matrix_add_vector(z2, b2, TEST_NUM, layer[2]);
+    matrix_single_op(z2, TEST_NUM, layer[2], "exp");
+    exp_scores = z2;
+    
+    // probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
+    softmax(exp_scores, TEST_NUM, layer[2]);
+    probs = exp_scores;
+
+    int cnt = 0;
+    int max_in;
+    int ground_truth;
+    for (i = 0; i < TEST_NUM; i++){
+        max_in = max_index(probs + i*CLASS_NUM, CLASS_NUM);
+        for (j = 0; j < CLASS_NUM; j++){
+            if (*(y_test + i*CLASS_NUM + j) == 1){
+                ground_truth = j;
+                break;
+            }
+        }
+        if (ground_truth == max_in)  cnt++;
+    }
+    free(a1); free(probs);
+    return cnt*1.0 / TEST_NUM;
+}
+
+int max_index(double* vec, int size){
+    int i;
+    double max = 0;
+    int max_index = 0;
+    for (i = 0; i < size; i++){
+       if (*(vec + i) > max){
+           max = *(vec + i);
+           max_index = i;
+       }
+    }
+    return max_index;
+}
+

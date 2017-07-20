@@ -10,10 +10,6 @@
  * The size of probs is TRAIN_NUM * layer[2]
  * The size of delta3 is same with probs
  */
-extern int layer[3];
-/* The input is 28*28 image, I need to flat it to 784
- */
-int layer[3] = {784, 200, 10};
 
 int main(char argc, char **argv){
     int row, col, i, j, iter;
@@ -24,15 +20,13 @@ int main(char argc, char **argv){
     int*    y_train = (int *)malloc(TRAIN_NUM * CLASS_NUM * sizeof(int));
     double* X_valid = (double *)malloc(VALIDATION_NUM * layer[0] * sizeof(double));
     int*    y_valid = (int *)malloc(VALIDATION_NUM * CLASS_NUM * sizeof(int));
-    double* X_test  = (double *)malloc(TEST_NUM * layer[0] * sizeof(double));
-    int*    y_test  = (int *)malloc(TEST_NUM * CLASS_NUM * sizeof(int));
 
     double* X_batch = (double *)malloc(BATCH_SIZE * layer[0] * sizeof(double));
     int*    y_batch = (int *)malloc(BATCH_SIZE * CLASS_NUM * sizeof(int));
 #if DEBUG_MAIN_PROCESS
         printf("\nStart read data....\n");
 #endif
-    read_data(X_train, y_train, X_valid, y_valid, X_test, y_test);
+    read_data(X_train, y_train, X_valid, y_valid);
 
     /* Init model */
     double* W1      = (double *)malloc(layer[0] * layer[1] * sizeof(double));
@@ -49,7 +43,6 @@ int main(char argc, char **argv){
     for (iter = 0; iter < EPOCHES; iter++){
         gen_batch(X_train, y_train, X_batch, y_batch);
         double* z1; double* a1; double* probs; double* z2; double* exp_scores;
-
 
 #if DEBUG_MAIN_PROCESS
         printf("\nStart forward propagation....\n");
@@ -88,7 +81,7 @@ int main(char argc, char **argv){
             for (j = 0; j < CLASS_NUM; j++){
                 if (*(y_batch + i*CLASS_NUM + j) == 1){
                     *(delta3 + i*layer[2] + j) -= 1;
-                    break;  // Break can only break out the most nearby for
+                    break;
                 }
             }
         }
@@ -165,28 +158,34 @@ int main(char argc, char **argv){
         // b2 += -LEARNING_RATE * db2
         matrix_single_const(dW1, (-1) * LEARNING_RATE, layer[0], layer[1], "multi");
         matrix_add(W1, dW1, layer[0], layer[1]);
-#if DEBUG_MAIN_PROCESS
-        printf("W1 += -LEARNING_RATE * dW1....\n");
-#endif
         matrix_single_const(db1, (-1) * LEARNING_RATE, 1, layer[1], "multi");
         matrix_add(b1, db1, 1, layer[1]);
-#if DEBUG_MAIN_PROCESS
-        printf("b1 += -LEARNING_RATE * db1....\n");
-#endif
         matrix_single_const(dW2, (-1) * LEARNING_RATE, layer[1], layer[2], "multi");
         matrix_add(W2, dW2, layer[1], layer[2]);
-#if DEBUG_MAIN_PROCESS
-        printf("W2 += -LEARNING_RATE * dW2....\n");
-#endif
         matrix_single_const(db2, (-1) * LEARNING_RATE, 1, layer[2], "multi");
         matrix_add(b2, db2, 1, layer[2]);
 
         free(db1); free(dW1); free(db2); free(delta2); free(dW2);
         
+        /* Calculate loss and determine when to stop */
+        double loss = calculate_loss(X_batch, y_batch, W1, b1, W2, b2);
+        double loss_query[INTERVAL_CHECK];
+        double thres = 0;
         if (iter % 10 == 0)
-            printf("Loss after iteration %d %lf\n", 
-                iter, calculate_loss(X_batch, y_batch, W1, b1, W2, b2));
+            printf("Loss after iteration %d: %lf\n", iter, loss);
+        loss_query[iter % INTERVAL_CHECK] = loss; 
+
+        if (iter > INTERVAL_CHECK){
+            for (i = 0; (iter > INTERVAL_CHECK) && (i < INTERVAL_CHECK-1); i++){
+                thres +=  abs(loss_query[i] - loss_query[i+1]);
+            }
+            if (abs(thres) < 0.001){
+                printf("Training over....\n");
+                //break;
+            }
+        }
     }
+    save_model(W1, b1, W2, b2);
 
 
     return 0;
