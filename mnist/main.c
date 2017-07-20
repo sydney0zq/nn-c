@@ -170,21 +170,10 @@ int main(char argc, char **argv){
         
         /* Calculate loss and determine when to stop */
         double loss = calculate_loss(X_batch, y_batch, W1, b1, W2, b2);
-        double loss_query[INTERVAL_CHECK];
         double thres = 0;
         if (iter % 100 == 0)
             printf("Loss after iteration %d: %lf\n", iter, loss);
-        //loss_query[iter % INTERVAL_CHECK] = loss; 
-
-        /*if (iter > INTERVAL_CHECK){
-            for (i = 0; (iter > INTERVAL_CHECK) && (i < INTERVAL_CHECK-1); i++){
-                thres +=  abs(loss_query[i] - loss_query[i+1]);
-            }
-            if (abs(thres) < 0.001){
-                printf("Training over....\n");
-                //break;
-            }
-        }*/
+        
     }
     save_model(W1, b1, W2, b2);
 
