@@ -140,6 +140,7 @@ int main(char argc, char **argv){
         free(reg_matrix_W2); reg_matrix_W2 = NULL;
 
         double* reg_matrix_W1  = (double *)malloc(layer[0] * layer[1] * sizeof(double)); //TODO free -
+        X_batch = transpose(X_batch, layer[0], BATCH_SIZE); 
         matrix_copy(reg_matrix_W1, W1, layer[0], layer[1]);
         matrix_single_const(reg_matrix_W1, REGULARIATION_LAMBDA, layer[0], layer[1], "multi");
         matrix_add(dW1, reg_matrix_W1, layer[0], layer[1]);
