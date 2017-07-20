@@ -112,11 +112,31 @@ int main(char argc, char **argv){
         matrix_single_const(reg_matrix, REGULARIATION_LAMBDA, layer[1], layer[2], "multi");
         matrix_add(dW2, reg_matrix, layer[1], layer[2]);
         free(reg_matrix);
-        
 
+        reg_matrix = matrix_single_const(W1, REGULARIATION_LAMBDA, layer[0], layer[1], "multi");
+        matrix_add(dW1, reg_matrix, layer[0], layer[1]);
+        free(reg_matrix);
 
-        
+        /* Gradient descent parameter update */
+        // W1 += -LEARNING_RATE * dW1
+        // b1 += -LEARNING_RATE * db1
+        // W2 += -LEARNING_RATE * dW2
+        // b2 += -LEARNING_RATE * db2
+        reg_matrix = matrix_single_const(dW1, (-1) * LEARNING_RATE, layer[0], layer[1], "multi");
+        matrix_add(W1, reg_matrix, layer[0], layer[1]);
+        free(reg_matrix);
 
+        reg_matrix = matrix_single_const(db1, (-1) * LEARNING_RATE, 1, layer[1], "multi");
+        matrix_add(b1, reg_matrix, 1, layer[1]);
+        free(reg_matrix);
+
+        reg_matrix = matrix_single_const(dW2, (-1) * LEARNING_RATE, layer[1], layer[2], "multi");
+        matrix_add(W2, reg_matrix, layer[1], layer[2]);
+        free(reg_matrix);
+
+        reg_matrix = matrix_single_const(db2, (-1) * LEARNING_RATE, 1, layer[2], "multi");
+        matrix_add(b2, reg_matrix, 1, layer[2]);
+        free(reg_matrix);
 
     }
 
