@@ -32,7 +32,6 @@ void gen_batch(double* X_train, int* y_train, double* X_batch, int* y_batch){
             *(y_batch + i*CLASS_NUM + j) = *(y_train + batch_index[i]*CLASS_NUM + j);
         }
     }
-    print_matrix(X_batch, BATCH_SIZE, layer[0]);
 }
 
 // You should NOTICE FREE matrix

@@ -14,11 +14,12 @@
 #define BATCH_SIZE 10
 #define LEARNING_RATE 0.01  //Learning rate for gradient descent
 #define REGULARIATION_LAMBDA 0.01   //Regularization strength
-#define EPOCHES 1
+#define EPOCHES 3
 
 //DEBUG DOMAIN/////////////////////////
 #define DEBUG_MAIN 0
 #define DEBUG_PRINT_DATASET_VALUE 0
+#define DEBUG_MAIN_PROCESS 1
 ///////////////////////////////////////
 
 /* The size of W1 is layer[0]*layer[1]
