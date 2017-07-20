@@ -13,7 +13,7 @@
 extern int layer[3];
 /* The input is 28*28 image, I need to flat it to 784
  */
-int layer[3] = {784, 100, 10};
+int layer[3] = {784, 200, 10};
 
 int main(char argc, char **argv){
     int row, col, i, j, iter;
@@ -85,7 +85,6 @@ int main(char argc, char **argv){
         // http://okye062gb.bkt.clouddn.com/2017-07-19-142324.jpg   Softmax BP Algorithm
         delta3 = probs;
         for (i = 0; i < BATCH_SIZE; i++){
-            int hit;
             for (j = 0; j < CLASS_NUM; j++){
                 if (*(y_batch + i*CLASS_NUM + j) == 1){
                     *(delta3 + i*layer[2] + j) -= 1;
@@ -99,13 +98,13 @@ int main(char argc, char **argv){
 
         // dW2 = (a1.T).dot(delta3)
         a1 = transpose(a1, BATCH_SIZE, layer[1]);
-        dW2 = matrix_multi(a1, delta3, layer[1], BATCH_SIZE, BATCH_SIZE, layer[2]);   //TODO free
+        dW2 = matrix_multi(a1, delta3, layer[1], BATCH_SIZE, BATCH_SIZE, layer[2]);   //TODO free -
 #if DEBUG_MAIN_PROCESS
         printf("dW2 = (a1.T).dot(delta3)....\n");
 #endif
 
         // db2 = np.sum(delta3, axis=0, keepdims=True)
-        db2 = matrix_sum(delta3, BATCH_SIZE, layer[2]);  //TODO free
+        db2 = matrix_sum(delta3, BATCH_SIZE, layer[2]);  //TODO free -
 #if DEBUG_MAIN_PROCESS
         printf("db2 = np.sum(delta3, axis=0, keepdims=True)....\n");
 #endif
@@ -118,7 +117,7 @@ int main(char argc, char **argv){
         matrix_single_const(a1, -1, BATCH_SIZE, layer[1], "multi");
         matrix_single_const(a1, 1, BATCH_SIZE, layer[1], "add");
         right = a1;
-        delta2 = elemwise_multi(left, right, BATCH_SIZE, layer[1], BATCH_SIZE, layer[1]); //TODO free
+        delta2 = elemwise_multi(left, right, BATCH_SIZE, layer[1], BATCH_SIZE, layer[1]); //TODO free -
         free(delta3); free(right);    //free z2(delta3/probs), free z1(a1)
         free(left);   //free left
 #if DEBUG_MAIN_PROCESS
@@ -127,12 +126,12 @@ int main(char argc, char **argv){
 
         // dW1 = np.dot(X.T, delta2)
         X_batch = transpose(X_batch, BATCH_SIZE, layer[0]); 
-        dW1 = matrix_multi(X_batch, delta2, layer[0], BATCH_SIZE, BATCH_SIZE, layer[1]);    //TODO free
+        dW1 = matrix_multi(X_batch, delta2, layer[0], BATCH_SIZE, BATCH_SIZE, layer[1]);    //TODO free -
 #if DEBUG_MAIN_PROCESS
         printf("dW1 = np.dot(X.T, delta2)....\n");
 #endif
         // db1 = np.sum(delta2, axis=0)
-        db1 = matrix_sum(delta2, BATCH_SIZE, layer[1]);  //TODO free
+        db1 = matrix_sum(delta2, BATCH_SIZE, layer[1]);  //TODO free -
 #if DEBUG_MAIN_PROCESS
         printf("db1 = np.sum(delta2, axis=0)....\n");
 #endif
@@ -181,9 +180,12 @@ int main(char argc, char **argv){
 #endif
         matrix_single_const(db2, (-1) * LEARNING_RATE, 1, layer[2], "multi");
         matrix_add(b2, db2, 1, layer[2]);
+
+        free(db1); free(dW1); free(db2); free(delta2); free(dW2);
         
-        printf("Loss after iteration %d %lf\n", 
-                iter, calculate_loss(X_batch, W1, b1, W2, b2));
+        if (iter % 10 == 0)
+            printf("Loss after iteration %d %lf\n", 
+                iter, calculate_loss(X_batch, y_batch, W1, b1, W2, b2));
     }
 
 

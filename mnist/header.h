@@ -12,30 +12,15 @@
 #define CLASS_NUM 10
 
 #define BATCH_SIZE 10
-#define LEARNING_RATE 0.01  //Learning rate for gradient descent
+#define LEARNING_RATE 0.04  //Learning rate for gradient descent
 #define REGULARIATION_LAMBDA 0.01   //Regularization strength
-#define EPOCHES 3
+#define EPOCHES 100000
 
 //DEBUG DOMAIN/////////////////////////
 #define DEBUG_MAIN 0
 #define DEBUG_PRINT_DATASET_VALUE 0
-#define DEBUG_MAIN_PROCESS 1
+#define DEBUG_MAIN_PROCESS 0
 ///////////////////////////////////////
-
-/* The size of W1 is layer[0]*layer[1]
- * The size of b1 is layer[1]
- * The size of W2 is layer[1]*layer[2]
- * The size of b2 is layer[2]
- */
-extern double* z1;
-extern double* z2;
-extern double* a1;
-extern double* W1;
-extern double* b1;
-extern double* W2;
-extern double* b2;
-extern double* exp_scores;
-extern double* probs;
 
 /* Function declarations */
 void read_data(double* X_train, int* y_train, double* X_valid, int* y_valid, double* X_test, int* y_test);
@@ -55,6 +40,6 @@ double* matrix_sum(double* matrix, int row, int col);
 void matrix_copy(double* Ma, double* Mb, int row, int col);
 void matrix_add(double* Ma, double* Mb, int row, int col);
 double* elemwise_multi(double* Ma, double* Mb, int row_a, int col_a, int row_b, int col_b);
-//double calculate_loss(struct data_box* ptr_train_data, double* X, double* W1, double* b1, double* W2, double* b2);
+double calculate_loss(double* X_batch, int* y_batch, double* W1, double* b1, double* W2, double* b2);
 
 #endif /* !HEADER_H */
