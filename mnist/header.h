@@ -14,9 +14,9 @@ extern int layer[3];
 #define CLASS_NUM 10
 
 #define BATCH_SIZE 10
-#define LEARNING_RATE 0.05  //Learning rate for gradient descent
+#define LEARNING_RATE 0.02  //Learning rate for gradient descent
 #define REGULARIATION_LAMBDA 0.01   //Regularization strength
-#define EPOCHES 20000
+#define EPOCHES 10000
 
 //DEBUG DOMAIN/////////////////////////
 #define DEBUG_MAIN 0
