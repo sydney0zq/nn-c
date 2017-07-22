@@ -2,4 +2,5 @@
 *.swp
 *.png
 __pycache__
-model/*
+mnist/model
+
