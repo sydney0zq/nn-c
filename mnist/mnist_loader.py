@@ -12,7 +12,8 @@ function usually called by our neural network code.
 """
 
 #Standard library
-import cPickle
+#import cPickle
+import pickle
 import gzip
 
 #Third-party libraries
@@ -44,7 +45,7 @@ def load_data():
     """
 
     f = gzip.open("../dataset/mnist.pkl.gz", "rb")
-    training_data, validation_data, test_data = cPickle.load(f)
+    training_data, validation_data, test_data = pickle.load(f, encoding='latin1')
     f.close()
     return (training_data, validation_data, test_data)
 
